@@ -82,7 +82,10 @@ Bash.prototype.createStream = function () {
                 return write(buf.slice(i + 1));
             }
             else if (c === 8) {
-                line = line.slice(0, -1);
+                if (line.length) {
+                    line = line.slice(0, -1);
+                    output.queue('\010 \010');
+                }
                 return write(buf.slice(i + 1));
             }
             else if (c === 10) {
