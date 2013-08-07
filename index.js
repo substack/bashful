@@ -116,7 +116,6 @@ Bash.prototype.createStream = function () {
         var line = typeof buf === 'string' ? buf : buf.toString('utf8');
         if (line === '') {
             if (!closed) {
-                output.queue('\n');
                 output.queue(self.getPrompt());
             }
             return;
