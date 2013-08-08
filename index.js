@@ -33,6 +33,8 @@ function Bash (opts) {
     this._exists = opts.exists;
     
     this._cursorX = 0;
+    this.history = [];
+    this.historyIndex = 0;
 }
 
 Bash.prototype._read = function (rfile) {
@@ -90,6 +92,28 @@ Bash.prototype.createStream = function () {
                 else if (dir === 'right' && self._cursorX < line.length) {
                     self._cursorX ++;
                     output.queue('\x1b\x5bC');
+                }
+                else if (dir === 'up') {
+                    if (self._cursorX !== line.length) {
+                        output.queue(
+                            '\x1b[' + (line.length - self._cursorX) + 'C'
+                        );
+                        self._cursorX = line.length;
+                    }
+                    else if (self.historyIndex > 0) {
+                        line = self.history[-- self.historyIndex];
+                        if (self._cursorX) {
+                            output.queue(
+                                '\x1b[' + self._cursorX + 'D\x1b[K'
+                                + line
+                            );
+                        }
+                        else output.queue(line);
+                        self._cursorX = line.length;
+                    }
+                }
+                else if (dir === 'down') {
+                    
                 }
                 
                 mode = null;
@@ -169,6 +193,8 @@ Bash.prototype.createStream = function () {
             }
             else if (c === 10) {
                 this.queue(line);
+                self.history.push(line);
+                self.historyIndex = self.history.length;
                 self._cursorX = 0;
                 line = '';
                 return write(buf.slice(i + 1));
