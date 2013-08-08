@@ -82,7 +82,7 @@ Bash.prototype.createStream = function () {
             }
             else if (mode === '[' && c >= 65 && c <= 68) {
                 var dir = {
-                    A: 'left', B: 'up', C: 'right', D: 'down'
+                    A: 'up', B: 'down', C: 'right', D: 'left'
                 }[String.fromCharCode(c)];
                 
                 if (dir === 'left' && self._cursorX) {
@@ -205,7 +205,7 @@ Bash.prototype.createStream = function () {
                 }
                 return write(buf.slice(i + 1));
             }
-            else if (c === 10) {
+            else if (c === 10 || c === 13) {
                 this.queue(line);
                 if (line.length) {
                     self.history.push(line);
