@@ -7,6 +7,8 @@ so you can use your own IO backend.
 
 # example
 
+using the default line-buffering in node:
+
 ``` js
 var bash = require('bashful');
 var fs = require('fs');
@@ -39,6 +41,36 @@ $ cat outfile.txt
 ONE TWO THREE
 $ wc -c < outfile.txt
 14
+```
+
+# raw mode
+
+in raw mode, you get history with up/down arrows, jumping around with
+left/right/home/end, and control characters like ^C and ^D:
+
+``` js
+var bash = require('bashful');
+var fs = require('fs');
+
+var sh = bash({
+    env: process.env,
+    spawn: require('child_process').spawn,
+    write: fs.createWriteStream,
+    read: fs.createReadStream,
+    exists: fs.exists
+});
+sh.on('close', process.exit);
+
+process.stdin.on('data', function (buf) {
+    if (buf[0] === 13) process.stdout.write('\n');
+    else if (buf[0] > 27 && buf[0] < 127) {
+        process.stdout.write(buf);
+    }
+});
+process.stdin.setRawMode(true);
+
+var s = sh.createStream();
+process.stdin.pipe(s).pipe(process.stdout);
 ```
 
 # methods
