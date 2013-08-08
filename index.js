@@ -322,6 +322,7 @@ Bash.prototype.createStream = function () {
     function end () {
         closed = true;
         output.queue(null);
+        self.emit('close');
     }
 };
 
