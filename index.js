@@ -140,8 +140,8 @@ Bash.prototype.createStream = function () {
                 line = before + middle + after;
                 if (after.length) {
                     output.queue(
-                        '\x1b[K' + after
-                        + '\x1b[' + after.length + 'D'
+                        '\x1b[K ' + after
+                        + '\x1b[' + (after.length + 1) + 'D'
                     );
                 }
                 self._cursorX ++;
