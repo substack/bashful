@@ -27,10 +27,10 @@ function Bash (opts) {
     if (!this.env.PWD) this.env.PWD = '/';
     this.custom = opts.custom || [];
     
-    this._reader = opts.read;
-    this._writer = opts.write;
-    this._spawner = opts.spawn;
-    this._exists = opts.exists;
+    this._reader = opts.read || function () {};
+    this._writer = opts.write || function () {};
+    this._spawner = opts.spawn || function () {};
+    this._exists = opts.exists || function (file, cb) { cb(false) };
     
     this._cursorX = 0;
     this.history = [];
