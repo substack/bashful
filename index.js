@@ -268,6 +268,7 @@ Bash.prototype.createStream = function () {
     var current = null;
     self.once('exit', end);
     
+    var queue = [];
     input.pipe(through(write, end));
     return duplexer(input, output);
     
@@ -279,6 +280,7 @@ Bash.prototype.createStream = function () {
             }
             return;
         }
+        if (current) return queue.push(line);
         
         var p = self.eval(line);
         p.on('SIGALRM', exit('SIGALRM', 142, 'Alarm clock'));
@@ -314,6 +316,13 @@ Bash.prototype.createStream = function () {
             current = null;
             nextTick(function () {
                 if (!closed) output.queue(self.getPrompt());
+                if (queue.length) {
+                    write(queue.shift());
+                }
+                else if (closed) {
+                    output.queue(null);
+                    self.emit('exit', 0);
+                }
             });
         });
         p.pipe(output, { end: false });
@@ -321,13 +330,11 @@ Bash.prototype.createStream = function () {
     }
     
     function end () {
-        if (closed) return;
+        closed = true;
         if (!current) {
-            closed = true;
             output.queue(null);
             self.emit('exit', 0);
         }
-        else current.on('exit', end);
     }
 };
 
