@@ -255,7 +255,9 @@ Bash.prototype.createStream = function () {
     
     function inputEnd () {
         if (line.length) this.queue(line);
-        this.queue(null);
+        nextTick(function () {
+            input.queue(null);
+        });
     }
     
     var closed = false;
@@ -302,7 +304,6 @@ Bash.prototype.createStream = function () {
         }
         
         current = p;
-        input.pause();
         p.pause();
         p.pipe(through(null, function () { p.emit('exit', 0) }));
         
@@ -310,7 +311,6 @@ Bash.prototype.createStream = function () {
         p.on('exit', function (code) {
             if (exitCode !== null) return;
             exitCode = code;
-            input.resume();
             current = null;
             nextTick(function () {
                 if (!closed) output.queue(self.getPrompt());
@@ -322,9 +322,12 @@ Bash.prototype.createStream = function () {
     
     function end () {
         if (closed) return;
-        closed = true;
-        output.queue(null);
-        self.emit('exit', 0);
+        if (!current) {
+            closed = true;
+            output.queue(null);
+            self.emit('exit', 0);
+        }
+        else current.on('exit', end);
     }
 };
 
