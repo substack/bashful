@@ -119,8 +119,14 @@ Bash.prototype.createStream = function () {
             else if (c === 8) {
                 if (self._cursorX) {
                     self._cursorX --;
-                    line = line.slice(0, -1);
-                    output.queue('\010 \010');
+                    var before = line.slice(0, self._cursorX)
+                    var after = line.slice(self._cursorX + 1)
+                    line = before + after;
+                    
+                    output.queue(
+                        '\010\x1b[K' + after
+                        + '\x1b[' + after.length + 'D'
+                    );
                 }
                 return write(buf.slice(i + 1));
             }
