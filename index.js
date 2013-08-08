@@ -96,7 +96,21 @@ Bash.prototype.createStream = function () {
                 continue;
             }
             else if (mode === '[' && (c >= 48 && c <= 57)) {
-                
+                mode = '[' + buf.charAt(i);
+                continue;
+            }
+            else if (/^\[\d/.test(mode) && c === 0x7e) {
+                if (mode === '[3') { // delete
+                    var before = line.slice(0, self._cursorX);
+                    var after = line.slice(self._cursorX + 1);
+                    line = before + after;
+                    output.queue(
+                        '\x1b[K' + after + '\x1b[' + after.length + 'D'
+                    );
+                }
+                // todo: pgup, pgdown, insert
+                mode = null;
+                continue;
             }
             else if (mode === 'O') {
                 var ch = buf.charAt(i);
