@@ -71,10 +71,14 @@ Bash.prototype.createStream = function () {
             var c = buf.charCodeAt(i);
             if (current) {}
             else if (mode === 'escape' && c === 0x5b) {
-                mode = 'arrow';
+                mode = '[';
                 continue;
             }
-            else if (mode === 'arrow' && c >= 65 && c <= 68) {
+            else if (mode === 'escape' && c === 0x4f) {
+                mode = 'O';
+                continue;
+            }
+            else if (mode === '[' && c >= 65 && c <= 68) {
                 var dir = {
                     A: 'left', B: 'up', C: 'right', D: 'down'
                 }[String.fromCharCode(c)];
@@ -88,6 +92,22 @@ Bash.prototype.createStream = function () {
                     output.queue('\x1b\x5bC');
                 }
                 
+                mode = null;
+                continue;
+            }
+            else if (mode === '[' && (c >= 48 && c <= 57)) {
+                
+            }
+            else if (mode === 'O') {
+                var ch = buf.charAt(i);
+                if (ch === 'F') { // end
+                    output.queue('\x1b[' + (line.length - self._cursorX) + 'C');
+                    self._cursorX = line.length;
+                }
+                else if (ch === 'H') { // home
+                    output.queue('\x1b[' + self._cursorX + 'D');
+                    self._cursorX = 0;
+                }
                 mode = null;
                 continue;
             }
