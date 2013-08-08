@@ -138,10 +138,17 @@ Bash.prototype.createStream = function () {
                 var after = line.slice(self._cursorX);
                 var middle = String.fromCharCode(c);
                 line = before + middle + after;
-                if (after.length) {
+                
+                if (after.length && middle === ' ') {
                     output.queue(
-                        '\x1b[K ' + after
-                        + '\x1b[' + (after.length + 1) + 'D'
+                        '\x1b[K' + after
+                        + '\x1b[' + (after.length + 1) + 'D '
+                    );
+                }
+                else if (after.length) {
+                    output.queue(
+                        '\x1b[K' + after
+                        + '\x1b[' + after.length + 'D'
                     );
                 }
                 self._cursorX ++;
