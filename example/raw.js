@@ -9,7 +9,7 @@ var sh = bash({
     read: fs.createReadStream,
     exists: fs.exists
 });
-sh.on('close', process.exit);
+sh.on('exit', process.exit);
 
 process.stdin.on('data', function (buf) {
     if (buf[0] === 13) process.stdout.write('\n');

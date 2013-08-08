@@ -128,6 +128,7 @@ functions you can list by typing `help` in a real bash shell.
 * `cd [-L|[-P [-e]]] [dir]`
 * `echo [-neE] [arg ...]`
 * `eval [arg ...]`
+* `exit [n]`
 * `false`
 * `filename [arguments]`
 * `pwd [-LP]`
@@ -159,7 +160,6 @@ functions you can list by typing `help` in a real bash shell.
 * `disown [-h] [-ar] [jobspec ...]`
 * `enable [-a] [-dnps] [-f filename] [na>`
 * `exec [-cl] [-a name] [command [argume>`
-* `exit [n]`
 * `export [-fn] [name[=value] ...] or ex>`
 * `fc [-e ename] [-lnr] [first] [last] o>`
 * `fg [job_spec]`

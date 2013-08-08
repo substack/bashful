@@ -264,6 +264,7 @@ Bash.prototype.createStream = function () {
     output.queue(self.getPrompt());
     
     var current = null;
+    self.once('exit', end);
     
     input.pipe(through(write, end));
     return duplexer(input, output);
@@ -320,9 +321,10 @@ Bash.prototype.createStream = function () {
     }
     
     function end () {
+        if (closed) return;
         closed = true;
         output.queue(null);
-        self.emit('close');
+        self.emit('exit', 0);
     }
 };
 
