@@ -35,6 +35,7 @@ function Bash (opts) {
     this._cursorX = 0;
     this.history = [];
     this.historyIndex = 0;
+    this._historyLast = null;
 }
 
 Bash.prototype._read = function (rfile) {
@@ -101,9 +102,9 @@ Bash.prototype.createStream = function () {
                         self._cursorX = line.length;
                     }
                     else if (self.historyIndex > 0) {
-                        if (self.historyIndex === self.history.length - 1
-                        && self.history[self.historyIndex] !== line) {
-                            self.history.push(line);
+                        if (self.historyIndex === self.history.length
+                        && self._historyLast === null) {
+                            self._historyLast = line;
                         }
                         line = self.history[-- self.historyIndex];
                         if (self._cursorX) {
@@ -117,8 +118,12 @@ Bash.prototype.createStream = function () {
                     }
                 }
                 else if (dir === 'down'
-                && self.historyIndex < self.history.length - 1) {
-                    line = self.history[++ self.historyIndex];
+                && self.historyIndex <= self.history.length - 1) {
+                    if (self.historyIndex === self.history.length - 1) {
+                        line = self._historyLast || '';
+                        self.historyIndex ++;
+                    }
+                    else line = self.history[++ self.historyIndex];
                     if (self._cursorX) {
                         output.queue(
                             '\x1b[' + self._cursorX + 'D\x1b[K'
@@ -177,6 +182,8 @@ Bash.prototype.createStream = function () {
                 else {
                     line = '';
                     self._cursorX = 0;
+                    self.historyIndex = self.history.length;
+                    self._historyLast = null;
                     output.queue('\n');
                     output.queue(self.getPrompt());
                 }
@@ -188,7 +195,7 @@ Bash.prototype.createStream = function () {
                 self._cursorX = 0;
                 return write(buf.slice(i + 1));
             }
-            else if (c === 8) {
+            else if (c === 8 || c === 0x7f) {
                 if (self._cursorX) {
                     self._cursorX --;
                     var before = line.slice(0, self._cursorX)
@@ -210,6 +217,7 @@ Bash.prototype.createStream = function () {
                 if (line.length) {
                     self.history.push(line);
                     self.historyIndex = self.history.length;
+                    self._historyLast = null;
                 }
                 self._cursorX = 0;
                 line = '';
