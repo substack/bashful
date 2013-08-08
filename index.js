@@ -123,10 +123,13 @@ Bash.prototype.createStream = function () {
                     var after = line.slice(self._cursorX + 1)
                     line = before + after;
                     
-                    output.queue(
-                        '\010\x1b[K' + after
-                        + '\x1b[' + after.length + 'D'
-                    );
+                    if (after.length) {
+                        output.queue(
+                            '\010\x1b[K' + after
+                            + '\x1b[' + after.length + 'D'
+                        );
+                    }
+                    else output.queue('\010 \010');
                 }
                 return write(buf.slice(i + 1));
             }
