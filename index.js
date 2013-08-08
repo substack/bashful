@@ -101,6 +101,10 @@ Bash.prototype.createStream = function () {
                         self._cursorX = line.length;
                     }
                     else if (self.historyIndex > 0) {
+                        if (self.historyIndex === self.history.length - 1
+                        && self.history[self.historyIndex] !== line) {
+                            self.history.push(line);
+                        }
                         line = self.history[-- self.historyIndex];
                         if (self._cursorX) {
                             output.queue(
@@ -112,8 +116,18 @@ Bash.prototype.createStream = function () {
                         self._cursorX = line.length;
                     }
                 }
-                else if (dir === 'down') {
+                else if (dir === 'down'
+                && self.historyIndex < self.history.length - 1) {
+                    line = self.history[++ self.historyIndex];
+                    if (self._cursorX) {
+                        output.queue(
+                            '\x1b[' + self._cursorX + 'D\x1b[K'
+                            + line
+                        );
+                    }
+                    else output.queue(line)
                     
+                    self._cursorX = line.length;
                 }
                 
                 mode = null;
@@ -193,8 +207,10 @@ Bash.prototype.createStream = function () {
             }
             else if (c === 10) {
                 this.queue(line);
-                self.history.push(line);
-                self.historyIndex = self.history.length;
+                if (line.length) {
+                    self.history.push(line);
+                    self.historyIndex = self.history.length;
+                }
                 self._cursorX = 0;
                 line = '';
                 return write(buf.slice(i + 1));
