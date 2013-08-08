@@ -13,12 +13,7 @@ test('run', function (t) {
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ /home/test',
-            'boop',
-            'abcdefg',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ /home/test\nboop\nabcdefg\n');
     }));
     s.write('pwd\n');
     s.write('beep\n');
