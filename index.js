@@ -180,6 +180,10 @@ Bash.prototype.createStream = function () {
                 var before = line.slice(0, self._cursorX);
                 var after = line.slice(self._cursorX);
                 var middle = String.fromCharCode(c);
+                
+                if (!/\s/.test(middle) && c < 26) {
+                    output.queue('^' + String.fromCharCode(64 + c));
+                }
                 line = before + middle + after;
                 
                 if (after.length && middle === ' ') {
