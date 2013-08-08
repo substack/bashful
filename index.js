@@ -9,6 +9,8 @@ var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
 var nextTick = require('./lib/next_tick.js');
 
+var stringify = JSON.stringify
+
 module.exports = Bash;
 inherits(Bash, EventEmitter);
 
@@ -29,6 +31,8 @@ function Bash (opts) {
     this._writer = opts.write;
     this._spawner = opts.spawn;
     this._exists = opts.exists;
+    
+    this._cursorX = 0;
 }
 
 Bash.prototype._read = function (rfile) {
@@ -58,11 +62,40 @@ Bash.prototype.createStream = function () {
     var self = this;
     
     var line = '';
+    var mode = null;
+    
     var input = through(function write (buf) {
         if (typeof buf !== 'string') buf = buf.toString('utf8');
         
         for (var i = 0; i < buf.length; i++) {
             var c = buf.charCodeAt(i);
+            if (current) {}
+            else if (mode === 'escape' && c === 0x5b) {
+                mode = 'arrow';
+                continue;
+            }
+            else if (mode === 'arrow' && c >= 65 && c <= 68) {
+                var dir = {
+                    A: 'left', B: 'up', C: 'right', D: 'down'
+                }[String.fromCharCode(c)];
+                
+                if (dir === 'left' && self._cursorX) {
+                    self._cursorX --;
+                    output.queue('\x1b\x5bD');
+                }
+                else if (dir === 'right' && self._cursorX < line.length) {
+                    self._cursorX ++;
+                    output.queue('\x1b\x5bC');
+                }
+                
+                mode = null;
+                continue;
+            }
+            else if (mode) {
+                mode = null;
+                continue;
+            }
+            
             if (c === 3) {
                 if (current) {
                     line = '';
@@ -71,6 +104,7 @@ Bash.prototype.createStream = function () {
                 }
                 else {
                     line = '';
+                    self._cursorX = 0;
                     output.queue('\n');
                     output.queue(self.getPrompt());
                 }
@@ -79,10 +113,12 @@ Bash.prototype.createStream = function () {
             else if (c === 4) {
                 if (current) current.end();
                 else this.queue(null);
+                self._cursorX = 0;
                 return write(buf.slice(i + 1));
             }
             else if (c === 8) {
-                if (line.length) {
+                if (self._cursorX) {
+                    self._cursorX --;
                     line = line.slice(0, -1);
                     output.queue('\010 \010');
                 }
@@ -90,10 +126,26 @@ Bash.prototype.createStream = function () {
             }
             else if (c === 10) {
                 this.queue(line);
+                self._cursorX = 0;
                 line = '';
                 return write(buf.slice(i + 1));
             }
-            else line += String.fromCharCode(c);
+            else if (c === 0x1b) {
+                mode = 'escape';
+            }
+            else {
+                var before = line.slice(0, self._cursorX);
+                var after = line.slice(self._cursorX);
+                var middle = String.fromCharCode(c);
+                line = before + middle + after;
+                if (after.length) {
+                    output.queue(
+                        '\x1b[K' + after
+                        + '\x1b[' + after.length + 'D'
+                    );
+                }
+                self._cursorX ++;
+            }
         }
     }, inputEnd);
     
@@ -333,7 +385,7 @@ Bash.prototype.eval = function (line) {
         }
         if (!p) {
             p = resumer();
-            p.queue('No command "' + cmd + '" found\n');
+            p.queue('No command ' + stringify(cmd) + ' found\n');
             p.queue(null);
         }
         return p;
