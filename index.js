@@ -495,8 +495,9 @@ Bash.prototype.eval = function (line) {
             env: localEnv || self.env,
             cwd: self.env.PWD
         });
-        if (p && p.stdin && p.stdout) {
-            var d = duplexer(p.stdin, p.stdout);
+        if (p && p.stdout) {
+            var stdin = p.stdin || resumer();
+            var d = duplexer(stdin, p.stdout);
             p.on('exit', function (code) { d.emit('exit', code) });
             return d;
         }
