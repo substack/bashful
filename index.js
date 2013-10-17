@@ -433,6 +433,7 @@ Bash.prototype.eval = function (line) {
         if (!redirected) cmd.pipe(output, { end: false });
         
         cmd.on('exit', function (code) { exitCode = exitCode || code });
+        cmd.on('error', function (err) { output.emit('error', err) });
         cmd.on('end', function () {
             for (var next = commands[0]; next && next.op; next = commands[0]) {
                 commands.shift();
@@ -499,6 +500,7 @@ Bash.prototype.eval = function (line) {
             var stdin = p.stdin || resumer();
             var d = duplexer(stdin, p.stdout);
             p.on('exit', function (code) { d.emit('exit', code) });
+            p.on('error', function (e) { d.emit('error', e) });
             return d;
         }
         if (!p) {
