@@ -228,7 +228,7 @@ Bash.prototype.createStream = function () {
             else if (c === 0x1b) {
                 mode = 'escape';
             }
-            else {
+            else if (!self.current) {
                 var before = line.slice(0, self._cursorX);
                 var after = line.slice(self._cursorX);
                 var middle = String.fromCharCode(c);
@@ -355,7 +355,7 @@ Bash.prototype.eval = function (line) {
     if (!/\S+/.test(line)) {
         return builtins.echo.call(self, [ '-n' ]);
     }
-    var output = resumer();
+    var input = through(), output = resumer();
     
     if (Array.isArray(line)) line = line.join(' ');
     var parts = shellQuote.parse(line, function (key) {
@@ -382,6 +382,8 @@ Bash.prototype.eval = function (line) {
             else cmd.args.push(parts[i]);
         }
     }
+    
+    var index = 0;
     
     (function run (prevCode) {
         self.env['?'] = prevCode;
@@ -513,10 +515,12 @@ Bash.prototype.eval = function (line) {
             p.queue('No command ' + stringify(cmd) + ' found\n');
             p.queue(null);
         }
+        
+        if (index++ === 0) input.pipe(p);
         return p;
     }
     
-    return output;
+    return duplexer(input, output);
 };
 
 function copy (obj) {
