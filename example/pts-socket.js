@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var bash = require('../');
-var spawn = require('pty.js').spawn
+var spawn = require('pty.js').spawn;
 var clone = require('clone');
 var duplexer = require('duplexer');
 var ReadStream = require('tty').ReadStream;
@@ -15,5 +15,7 @@ var sh = bash({
     exists: fs.exists
 });
 
-var s = sh.createStream();
-process.stdin.pipe(s).pipe(process.stdout);
+require('net').createServer(function (sock) {
+  var s = sh.createStream();
+  sock.pipe(s).pipe(sock)
+}).listen(7777)
