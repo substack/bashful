@@ -191,6 +191,7 @@ Bash.prototype.createStream = function () {
                 }
                 return write(buf.slice(i + 1));
             }
+            else if (self.current) {}
             else if (c === 4) {
                 if (self.current) self.current.end();
                 else this.queue(null);
@@ -228,7 +229,7 @@ Bash.prototype.createStream = function () {
             else if (c === 0x1b) {
                 mode = 'escape';
             }
-            else if (!self.current) {
+            else {
                 var before = line.slice(0, self._cursorX);
                 var after = line.slice(self._cursorX);
                 var middle = String.fromCharCode(c);
