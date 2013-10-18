@@ -216,6 +216,9 @@ Bash.prototype.createStream = function () {
                 return write(buf.slice(i + 1));
             }
             else if (c === 10 || c === 13) {
+                if (buf.substr(i, 2) === '\r\n') {
+                    i += 1;
+                }
                 this.queue(line);
                 if (line.length) {
                     self.history.push(line);
