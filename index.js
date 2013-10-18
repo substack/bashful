@@ -275,10 +275,10 @@ Bash.prototype.createStream = function () {
     self.once('exit', end);
     
     var queue = [];
-    input.pipe(through(write, end));
+    input.pipe(through(evaluator, end));
     return duplexer(input, output);
     
-    function write (buf) {
+    function evaluator (buf) {
         var line = typeof buf === 'string' ? buf : buf.toString('utf8');
         if (line === '') {
             if (!closed) {
@@ -323,7 +323,7 @@ Bash.prototype.createStream = function () {
             nextTick(function () {
                 if (!closed) output.queue(self.getPrompt());
                 if (queue.length) {
-                    write(queue.shift());
+                    evaluator(queue.shift());
                 }
                 else if (closed) {
                     output.queue(null);
