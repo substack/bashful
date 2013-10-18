@@ -387,8 +387,6 @@ Bash.prototype.eval = function (line) {
         }
     }
     
-    var index = 0;
-    
     (function run (prevCode) {
         self.env['?'] = prevCode;
         
@@ -399,6 +397,7 @@ Bash.prototype.eval = function (line) {
             });
         }
         var cmd = shiftCommand();
+        input.pipe(cmd);
         var redirected = false;
         
         while (commands[0] && /^[|<>]$/.test(commands[0].op)) {
@@ -520,7 +519,6 @@ Bash.prototype.eval = function (line) {
             p.queue(null);
         }
         
-        if (index++ === 0) input.pipe(p);
         return p;
     }
     
