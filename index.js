@@ -31,6 +31,7 @@ function Bash (opts) {
     this._writer = opts.write || function () {};
     this._spawner = opts.spawn || function () {};
     this._exists = opts.exists || function (file, cb) { cb(false) };
+    this._globber = opts.glob || function (p, cb) { cb(p) };
     
     this._cursorX = 0;
     this.history = [];
@@ -361,6 +362,12 @@ Bash.prototype.eval = function (line) {
     });
     var commands = [];
     
+    for (var i = 0; i < parts.length; i++) {
+        if (typeof parts[i] === 'object' && parts[i].op === 'glob') {
+            // todo: globs
+            parts[i] = parts[i].pattern;
+        }
+    }
     for (var i = 0; i < parts.length; i++) {
         if (typeof parts[i] === 'object' && parts[i].op) {
             commands.push(parts[i]);
