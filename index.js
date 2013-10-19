@@ -571,7 +571,9 @@ Bash.prototype.eval = function (line) {
         return p;
     }
     
-    return duplexer(input, output);
+    var s = duplexer(input, output);
+    output.on('exit', function (c) { s.emit('exit', c) });
+    return s
 };
 
 Bash.prototype._jobIndex = function () {
