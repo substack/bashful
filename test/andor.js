@@ -16,8 +16,8 @@ test('true and', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ TRUE\nabcdefg\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ TRUE\nabcdefg\n');
     }));
     s.end('true && echo $XYZ\n');
 });
@@ -32,8 +32,8 @@ test('false and', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ FALSE\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ FALSE\n');
     }));
     s.end('false && echo $XYZ\n');
 });
@@ -48,8 +48,8 @@ test('false or', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ FALSE\nabcdefg\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ FALSE\nabcdefg\n');
     }));
     s.end('false || echo $XYZ\n');
 });
@@ -64,8 +64,8 @@ test('true or', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ TRUE\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ TRUE\n');
     }));
     s.end('true || echo $XYZ\n');
 });
@@ -80,7 +80,7 @@ test('false and true or', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(src, '$ FALSE\nabcdefg\n');
     }));
     s.end('false && true || echo $XYZ\n');
@@ -96,8 +96,8 @@ test('false or true and', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ FALSE\nTRUE\nabcdefg\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ FALSE\nTRUE\nabcdefg\n');
     }));
     s.end('false || true && echo $XYZ\n');
 });
@@ -112,8 +112,8 @@ test('false or false and', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ FALSE\nFALSE\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ FALSE\nFALSE\n');
     }));
     s.end('false || false && echo $XYZ\n');
 });

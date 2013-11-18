@@ -16,8 +16,8 @@ test('run', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, [
+    s.pipe(concat(function (src) {
+        t.equal(src + '', [
             '$ /home/test',
             'boop',
             'abcdefg',

@@ -26,8 +26,8 @@ test('wc -c < file', function (t) {
     fs.writeFileSync(tempfile, 'beep boop\n');
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 10\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ 10\n');
     }));
     s.write('wc -c < ' + tempfile + '\n');
     s.end();
@@ -44,8 +44,8 @@ test('wc -c < relative_file', function (t) {
     fs.writeFileSync(tempfile, 'beep boop\n');
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 10\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ 10\n');
     }));
     s.write('wc -c < ' + path.basename(tempfile) + '\n');
     s.end();
@@ -62,8 +62,8 @@ test('cat < file | wc -c', function (t) {
     fs.writeFileSync(tempfile, 'beep boop\n');
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 10\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ 10\n');
     }));
     s.write('cat < ' + tempfile + '| wc -c\n');
     s.end();

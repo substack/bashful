@@ -20,8 +20,8 @@ test('basic cd', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 0\n/home/robot\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ 0\n/home/robot\n');
     }));
     s.end('cd; echo $?; pwd');
 });

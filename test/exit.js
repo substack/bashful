@@ -17,7 +17,7 @@ test('true $?', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(env['?'], 0);
     }));
     s.end('true\n');
@@ -34,7 +34,7 @@ test('false $?', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(env['?'], 1);
     }));
     s.end('false\n');
@@ -51,7 +51,7 @@ test('true; echo $?', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(src, '$ 0\n');
     }));
     s.end('true; echo $?\n');
@@ -68,7 +68,7 @@ test('false; echo $?', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(src, '$ 1\n');
     }));
     s.end('false; echo $?\n');

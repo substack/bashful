@@ -305,6 +305,7 @@ Bash.prototype.createStream = function () {
                     output.queue(msg + '\n');
                     p.emit('exit', code);
                 }
+                else p.emit('exit', code);
             };
         }
         

@@ -31,12 +31,12 @@ test('echo > file', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(
             fs.readFileSync(tempfile, 'utf8'),
             'beep boop\n'
         );
-        t.equal(src, 'beep boop\n');
+        t.equal(src + '', 'beep boop\n');
     }));
     s.write('echo beep boop > ' + tempfile + '\n');
     s.write('cat ' + tempfile + '\n');
@@ -54,7 +54,7 @@ test('echo | wc -c > file', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(
             fs.readFileSync(tempfile, 'utf8'),
             '10\n'
@@ -75,12 +75,12 @@ test('pwd; echo | wc -c > file', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(
             fs.readFileSync(tempfile, 'utf8'),
             '10\n'
         );
-        t.equal(src, tempdir + '\n10\n');
+        t.equal(src + '', tempdir + '\n10\n');
     }));
     s.write('pwd; echo beep boop | wc -c > ' + path.basename(tempfile) + '\n');
     s.write('cat ' + path.basename(tempfile) + '\n');
@@ -98,12 +98,12 @@ test('echo | wc -c > file; pwd', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(
             fs.readFileSync(tempfile, 'utf8'),
             '10\n'
         );
-        t.equal(src, path.dirname(tempfile) + '\n10\n');
+        t.equal(src + '', path.dirname(tempfile) + '\n10\n');
     }));
     s.write('echo beep boop | wc -c > ' + path.basename(tempfile) + '; pwd\n');
     s.write('cat ' + path.basename(tempfile) + '\n');
@@ -121,9 +121,9 @@ test('true > file && echo PASS', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(fs.readFileSync(tempfile, 'utf8'), '');
-        t.equal(src, '$ PASS\n');
+        t.equal(src + '', '$ PASS\n');
     }));
     s.write('true > ' + tempfile + ' && echo PASS\n');
     s.end();
@@ -140,9 +140,9 @@ test('false > file && echo PASS', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(fs.readFileSync(tempfile, 'utf8'), '');
-        t.equal(src, '$ ');
+        t.equal(src + '', '$ ');
     }));
     s.write('false > ' + tempfile + ' && echo PASS\n');
     s.end();
@@ -159,9 +159,9 @@ test('true > file || echo PASS', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(fs.readFileSync(tempfile, 'utf8'), '');
-        t.equal(src, '$ ');
+        t.equal(src + '', '$ ');
     }));
     s.write('true > ' + tempfile + ' || echo PASS\n');
     s.end();
@@ -178,9 +178,9 @@ test('false > file || echo PASS', function (t) {
     });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
+    s.pipe(concat(function (src) {
         t.equal(fs.readFileSync(tempfile, 'utf8'), '');
-        t.equal(src, '$ PASS\n');
+        t.equal(src + '', '$ PASS\n');
     }));
     s.write('false > ' + tempfile + ' || echo PASS\n');
     s.end();

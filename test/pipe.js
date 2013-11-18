@@ -9,8 +9,8 @@ test('run', function (t) {
     var sh = bash({ spawn: run, env: { 'PS1': '$ ' } });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 10\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ 10\n');
     }));
     s.write('echo beep boop | wc -c\n');
     s.end();

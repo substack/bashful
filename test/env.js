@@ -9,8 +9,8 @@ test('set env vars', function (t) {
     var sh = bash({ spawn: run, env: { X: 3, PS1: '$ ' } });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 3\n5\n3\n2\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ 3\n5\n3\n2\n');
     }));
     s.write('printx; X=5 printx; printx; X=2; printx\n');
     s.end();
@@ -22,8 +22,8 @@ test('set quoted env var', function (t) {
     var sh = bash({ spawn: run, env: { X: 3, PS1: '$ ' } });
     
     var s = sh.createStream();
-    s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 7 8 9\n');
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ 7 8 9\n');
     }));
     s.write('X="7 8 9"; printx\n');
     s.end();
