@@ -191,7 +191,6 @@ Bash.prototype.createStream = function () {
                 }
                 return write(buf.slice(i + 1));
             }
-            else if (self.current) {}
             else if (c === 4) {
                 if (self.current) self.current.end();
                 else this.queue(null);
