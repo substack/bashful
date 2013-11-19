@@ -11,7 +11,7 @@ var sh = bash({
 });
 sh.on('done', function (index, job) {
     console.log(
-        '[' + index + '] '
+        '[' + index + '] Done '
         + job.command + ' '
         + job.arguments.join(' ')
     );
