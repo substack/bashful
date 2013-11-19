@@ -37,7 +37,7 @@ function Bash (opts) {
     this.history = [];
     this.historyIndex = 0;
     this._historyLast = null;
-    this._jobs = [];
+    this.jobs = {};
 }
 
 Bash.prototype._read = function (rfile) {
@@ -216,7 +216,7 @@ Bash.prototype.createStream = function () {
                 return write(buf.slice(i + 1));
             }
             else if (c === 10 || c === 13) {
-                this.queue(line);
+                input.queue(line);
                 if (line.length) {
                     self.history.push(line);
                     self.historyIndex = self.history.length;
@@ -258,9 +258,11 @@ Bash.prototype.createStream = function () {
     
     function inputEnd () {
         if (line.length) this.queue(line);
-        if (self._jobs.length > 0) {
-            var pending = self._jobs.length;
-            self._jobs.forEach(function (j) {
+        var jobs = Object.keys(self.jobs);
+        var pending = jobs.length;
+        if (pending > 0) {
+            jobs.forEach(function (index) {
+                var j = self.jobs[index];
                 j.on('data', function (buf) {
                     output.queue(buf);
                 });
@@ -414,14 +416,21 @@ Bash.prototype.eval = function (line) {
                 cmd = cmd.pipe(shiftCommand());
             }
             else if (op === '&') {
-                self._jobs.push(cmd);
-                cmd.on('end', function () {
-                    var ix = self._jobs.indexOf(cmd);
-                    self._jobs.splice(ix, 1);
-                    self.emit('done', cmd);
-                });
+                var index = self._jobIndex();
+                self.jobs[index] = cmd;
+                (function (cmd) {
+                    cmd.on('end', function () {
+                        delete self.jobs[index];
+                        self.emit('done', index, cmd);
+                    });
+                })(cmd);
                 self.emit('job', cmd);
-                cmd = shiftCommand();
+                if (commands.length) {
+                    cmd = shiftCommand();
+                }
+                else {
+                    cmd = builtins['true'].call(self, []);
+                }
             }
             else if (op === '>') {
                 var c = commands.shift();
@@ -509,6 +518,8 @@ Bash.prototype.eval = function (line) {
                     self.env[key] = localEnv[key];
                 });
                 var tr = resumer();
+                tr.command = cmd;
+                tr.arguments = args;
                 tr.queue(null);
                 return tr;
             }
@@ -519,15 +530,21 @@ Bash.prototype.eval = function (line) {
         }
         
         if (builtins[cmd] && self.custom.indexOf(cmd) < 0) {
-            return builtins[cmd].call(self, args);
+            var p = builtins[cmd].call(self, args);
+            p.command = cmd;
+            p.arguments = args;
+            return p;
         }
         
         var p = self._spawn(cmd, args, {
             env: localEnv || self.env,
             cwd: self.env.PWD
         });
+        
         if (p && p.stdin && p.stdout) {
             var d = duplexer(p.stdin, p.stdout);
+            d.command = cmd;
+            d.arguments = args;
             p.on('exit', function (code) { d.emit('exit', code) });
             return d;
         }
@@ -538,10 +555,20 @@ Bash.prototype.eval = function (line) {
         }
         
         if (index++ === 0) input.pipe(p);
+        
+        p.command = cmd;
+        p.arguments = args;
+        
         return p;
     }
     
     return duplexer(input, output);
+};
+
+Bash.prototype._jobIndex = function () {
+    var jobs = Object.keys(this.jobs).map(Number);
+    if (jobs.length === 0) return 0;
+    return Math.max.apply(null, jobs);
 };
 
 function copy (obj) {

@@ -9,6 +9,13 @@ var sh = bash({
     read: fs.createReadStream,
     exists: fs.exists
 });
+sh.on('done', function (index, job) {
+    console.log(
+        '[' + index + '] '
+        + job.command + ' '
+        + job.arguments.join(' ')
+    );
+});
 
 var s = sh.createStream();
 process.stdin.pipe(s).pipe(process.stdout);
