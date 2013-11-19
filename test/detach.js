@@ -10,7 +10,7 @@ test('detach', function (t) {
     
     var s = sh.createStream();
     s.pipe(concat(function (src) {
-        t.equal(src + '', '$ beep boop!');
+        t.equal(src + '', '$ beep $ boop!');
     }));
     s.write('first & second\n');
     s.end();

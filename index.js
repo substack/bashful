@@ -37,6 +37,7 @@ function Bash (opts) {
     this.history = [];
     this.historyIndex = 0;
     this._historyLast = null;
+    this._jobs = [];
 }
 
 Bash.prototype._read = function (rfile) {
@@ -257,9 +258,19 @@ Bash.prototype.createStream = function () {
     
     function inputEnd () {
         if (line.length) this.queue(line);
-        nextTick(function () {
-            input.queue(null);
-        });
+        if (self._jobs.length > 0) {
+            var pending = self._jobs.length;
+            self._jobs.forEach(function (j) {
+                j.on('data', function (buf) {
+                    output.queue(buf);
+                });
+                j.on('end', function () {
+console.log('JOB END');
+                    if (--pending === 0) input.queue(null);
+                });
+            });
+        }
+        else input.queue(null);
     }
     
     var closed = false;
@@ -398,10 +409,18 @@ Bash.prototype.eval = function (line) {
         var cmd = shiftCommand();
         var redirected = false;
         
-        while (commands[0] && /^[|<>]$/.test(commands[0].op)) {
+        while (commands[0] && /^[&|<>]$/.test(commands[0].op)) {
             var op = commands.shift().op;
             if (op === '|') {
                 cmd = cmd.pipe(shiftCommand());
+            }
+            else if (op === '&') {
+                self._jobs.push(cmd);
+                cmd.on('end', function () {
+                    var ix = self._jobs.indexOf(cmd);
+                    self._jobs.splice(ix, 1);
+                });
+                cmd = shiftCommand();
             }
             else if (op === '>') {
                 var c = commands.shift();
