@@ -265,7 +265,6 @@ Bash.prototype.createStream = function () {
                     output.queue(buf);
                 });
                 j.on('end', function () {
-console.log('JOB END');
                     if (--pending === 0) input.queue(null);
                 });
             });
@@ -419,7 +418,9 @@ Bash.prototype.eval = function (line) {
                 cmd.on('end', function () {
                     var ix = self._jobs.indexOf(cmd);
                     self._jobs.splice(ix, 1);
+                    self.emit('done', cmd);
                 });
+                self.emit('job', cmd);
                 cmd = shiftCommand();
             }
             else if (op === '>') {
