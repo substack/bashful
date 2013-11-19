@@ -116,6 +116,22 @@ Just before a file is read, this event fires.
 
 Just before a file is written to, this event fires.
 
+## bash.on('detach', function (index, cmd) {})
+
+When a process gets detached (with the `&` operator), this event fires with the
+job `index` and the process reference or stream object `cmd`.
+
+You can also check the `cmd.command` and `cmd.arguments` to get the command and
+arguments of the original invocation.
+
+## bash.on('done', function (index, cmd) {})
+
+When a detached process exits, this event fires with the job `index` and the
+process reference or stream object `cmd`.
+
+You can also check the `cmd.command` and `cmd.arguments` to get the command and
+arguments of the original invocation.
+
 # status
 
 The scope of this module is to only support the internally-defined bash
@@ -123,6 +139,7 @@ functions you can list by typing `help` in a real bash shell.
 
 ## implemented
 
+* `job_spec [&]`
 * `&&`, `;`, `||`, `|`, `<`, `>`
 * `$?`
 * `cd [-L|[-P [-e]]] [dir]`
@@ -131,12 +148,12 @@ functions you can list by typing `help` in a real bash shell.
 * `exit [n]`
 * `false`
 * `filename [arguments]`
+* `jobs [-lnprs] [jobspec ...] or jobs >`
 * `pwd [-LP]`
 * `true`
 
 ## not yet implemented
 
-* `job_spec [&]`
 * `(( expression ))`
 * `. filename [arguments]`
 * `:`
@@ -171,7 +188,6 @@ functions you can list by typing `help` in a real bash shell.
 * `help [-dms] [pattern ...]`
 * `history [-c] [-d offset] [n] or hist>`
 * `if COMMANDS; then COMMANDS; [ elif C>`
-* `jobs [-lnprs] [jobspec ...] or jobs >`
 * `kill [-s sigspec | -n signum | -sigs>`
 * `let arg [arg ...]`
 * `local [option] name[=value] ...`

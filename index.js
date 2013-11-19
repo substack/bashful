@@ -424,7 +424,7 @@ Bash.prototype.eval = function (line) {
                         self.emit('done', index, cmd);
                     });
                 })(cmd);
-                self.emit('job', cmd);
+                self.emit('detach', cmd);
                 if (commands.length) {
                     cmd = shiftCommand();
                 }
