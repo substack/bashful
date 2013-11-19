@@ -568,7 +568,7 @@ Bash.prototype.eval = function (line) {
 Bash.prototype._jobIndex = function () {
     var jobs = Object.keys(this.jobs).map(Number);
     if (jobs.length === 0) return 0;
-    return Math.max.apply(null, jobs);
+    return Math.max.apply(null, jobs) + 1;
 };
 
 function copy (obj) {
