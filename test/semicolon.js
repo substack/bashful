@@ -1,4 +1,4 @@
-var test = require('tap').test;
+var test = require('tape');
 var bash = require('../');
 var resumer = require('resumer');
 var concat = require('concat-stream');
