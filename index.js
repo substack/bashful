@@ -418,12 +418,12 @@ Bash.prototype.eval = function (line) {
             else if (op === '&') {
                 var index = self._jobIndex();
                 self.jobs[index] = cmd;
-                (function (cmd) {
+                (function (cmd, index) {
                     cmd.on('end', function () {
                         delete self.jobs[index];
                         self.emit('done', index, cmd);
                     });
-                })(cmd);
+                })(cmd, index);
                 self.emit('detach', cmd);
                 if (commands.length) {
                     cmd = shiftCommand();
