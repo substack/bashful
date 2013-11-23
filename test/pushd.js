@@ -52,3 +52,30 @@ test('pushd with no arguments and an empty stack should err', function (t) {
     }));
     s.end('pushd');
 });
+
+test('pushd with no arguments swaps top two dirs', function (t) {
+    t.plan(2);
+
+    var sh = bash({
+        spawn: function (cmd) { t.fail('spawn ' + cmd) },
+        env: {
+            PS1: '$ ',
+            PWD: '/beep/boop',
+            HOME: '/home/robot'
+        },
+        exists: function (file, cb) {
+            t.equal(file, '/home/robot');
+            cb(file === '/home/robot');
+        }
+    });
+    sh.dirs = [
+        '/beep/boop',
+        '/home/robot'
+    ];
+
+    var s = sh.createStream();
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ /home/robot /beep/boop\n0\n/home/robot\n');
+    }));
+    s.end('pushd; echo $?; pwd;');
+});
