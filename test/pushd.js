@@ -111,7 +111,7 @@ test('pushd with no arguments handles missing destination dir', function (t) {
 
     var s = sh.createStream();
     s.pipe(concat(function (src) {
-        t.equal(src + '', '$ pushd: : No such file or directory\n0\n/beep/boop\n');
+        t.equal(src + '', '$ pushd: /does/not/exist: No such file or directory\n0\n/beep/boop\n');
         t.same(sh.dirs, [
             '/beep/boop'
         ]);
