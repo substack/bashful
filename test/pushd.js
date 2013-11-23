@@ -32,3 +32,23 @@ test('basic pushd', function (t) {
     }));
     s.end('pushd ~; echo $?; pwd; pushd /beep/boop; echo $?; pwd;');
 });
+
+test('pushd with no arguments and an empty stack should err', function (t) {
+    t.plan(1);
+
+    var sh = bash({
+        spawn: function (cmd) { t.fail('spawn ' + cmd) },
+        env: {
+            PS1: '$ ',
+            PWD: '/beep/boop',
+            HOME: '/home/robot'
+        },
+        exists: function (cmd) { t.fail('exists ' + cmd) }
+    });
+
+    var s = sh.createStream();
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ pushd: no other directory\n');
+    }));
+    s.end('pushd');
+});
