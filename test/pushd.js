@@ -4,7 +4,7 @@ var through = require('through');
 var concat = require('concat-stream');
 
 test('basic pushd', function (t) {
-    t.plan(3);
+    t.plan(4);
 
     var dirs = [
         '/home/robot',
@@ -29,12 +29,17 @@ test('basic pushd', function (t) {
     s.pipe(concat(function (src) {
         t.equal(src + '', '$ /home/robot /beep/boop\n0\n/home/robot\n'
             + '/beep/boop /home/robot /beep/boop\n0\n/beep/boop\n');
+        t.same(sh.dirs, [
+            '/beep/boop',
+            '/home/robot',
+            '/beep/boop'
+        ]);
     }));
     s.end('pushd ~; echo $?; pwd; pushd /beep/boop; echo $?; pwd;');
 });
 
 test('pushd with no arguments and an empty stack should err', function (t) {
-    t.plan(1);
+    t.plan(2);
 
     var sh = bash({
         spawn: function (cmd) { t.fail('spawn ' + cmd) },
@@ -49,12 +54,13 @@ test('pushd with no arguments and an empty stack should err', function (t) {
     var s = sh.createStream();
     s.pipe(concat(function (src) {
         t.equal(src + '', '$ pushd: no other directory\n');
+        t.same(sh.dirs, []);
     }));
     s.end('pushd');
 });
 
 test('pushd with no arguments swaps top two dirs', function (t) {
-    t.plan(2);
+    t.plan(3);
 
     var sh = bash({
         spawn: function (cmd) { t.fail('spawn ' + cmd) },
@@ -76,6 +82,41 @@ test('pushd with no arguments swaps top two dirs', function (t) {
     var s = sh.createStream();
     s.pipe(concat(function (src) {
         t.equal(src + '', '$ /home/robot /beep/boop\n0\n/home/robot\n');
+        t.same(sh.dirs, [
+            '/home/robot',
+            '/beep/boop'
+        ]);
+    }));
+    s.end('pushd; echo $?; pwd;');
+});
+
+test('pushd with no arguments handles missing destination dir', function (t) {
+    t.plan(3);
+
+    var sh = bash({
+        spawn: function (cmd) { t.fail('spawn ' + cmd) },
+        env: {
+            PS1: '$ ',
+            PWD: '/beep/boop',
+            HOME: '/home/robot'
+        },
+        exists: function (file, cb) {
+            t.equal(file, '/does/not/exist');
+            cb(false);
+        }
+    });
+    sh.dirs = [
+        '/beep/boop',
+        '/does/not/exist'
+    ];
+
+    var s = sh.createStream();
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ pushd: : No such file or directory\n0\n/beep/boop\n');
+        t.same(sh.dirs, [
+            '/beep/boop',
+            '/beep/boop'
+        ]);
     }));
     s.end('pushd; echo $?; pwd;');
 });
