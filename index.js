@@ -264,7 +264,7 @@ Bash.prototype.createStream = function () {
             jobs.forEach(function (index) {
                 var j = self.jobs[index];
                 j.on('data', function (buf) {
-                    output.queue(buf);
+                    //output.queue(buf);
                 });
                 j.on('end', function () {
                     if (--pending === 0) input.queue(null);
@@ -324,6 +324,7 @@ Bash.prototype.createStream = function () {
         }
         
         self.current = p;
+        
         p.pause();
         p.pipe(through(null, function () { p.emit('exit', 0) }));
         
@@ -422,8 +423,10 @@ Bash.prototype.eval = function (line) {
                 var index = self._jobIndex();
                 self.jobs[index] = cmd;
                 (function (cmd, index) {
-                    cmd.on('data', function (buf) {
-                        self.emit('bgdata', buf);
+                    process.nextTick(function () {
+                        cmd.on('data', function (buf) {
+                            self.emit('bgdata', buf);
+                        });
                     });
                     cmd.on('end', function () {
                         delete self.jobs[index];
