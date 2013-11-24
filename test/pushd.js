@@ -161,14 +161,14 @@ test('pushd with stack rotation argument greater than stack size', function (t) 
 
     var s = sh.createStream();
     s.pipe(concat(function (src) {
-        t.equal(src + '', '$ pushd: -9: directory stack index out of range\n1\n/beep/boop\n');
+        t.equal(src + '', '$ pushd: -3: directory stack index out of range\n1\n/beep/boop\n');
         t.same(sh.dirs, [
             '/beep/boop',
             '/home/robot'
         ]);
         t.equal(sh.env.PWD, '/beep/boop');
     }));
-    s.end('pushd -9; echo $?; pwd;');
+    s.end('pushd -3; echo $?; pwd;');
 });
 
 test('pushd avoids false positives for stack rotation arguments', function (t) {
@@ -209,8 +209,8 @@ test('pushd with positive stack rotation argument', function (t) {
             HOME: '/home/robot'
         },
         exists: function (file, cb) {
-            t.equal(file, '/2');
-            cb(file === '/2');
+            t.equal(file, '/1');
+            cb(file === '/1');
         }
     });
     sh.dirs = [
@@ -221,15 +221,15 @@ test('pushd with positive stack rotation argument', function (t) {
 
     var s = sh.createStream();
     s.pipe(concat(function (src) {
-        t.equal(src + '', '$ /2 /1 /4 /3\n0\n/2\n');
+        t.equal(src + '', '$ /1 /4 /3 /2\n0\n/1\n');
         t.same(sh.dirs, [
-            '/1',
             '/4',
-            '/3'
+            '/3',
+            '/2'
         ]);
-        t.equal(sh.env.PWD, '/2');
+        t.equal(sh.env.PWD, '/1');
     }));
-    s.end('pushd +2; echo $?; pwd;');
+    s.end('pushd +3; echo $?; pwd;');
 });
 
 test('pushd with negative stack rotation argument', function (t) {
