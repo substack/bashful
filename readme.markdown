@@ -149,6 +149,7 @@ functions you can list by typing `help` in a real bash shell.
 * `false`
 * `filename [arguments]`
 * `jobs [-lnprs] [jobspec ...] or jobs >`
+* `pushd [-n] [+N | -N | dir]`
 * `pwd [-LP]`
 * `true`
 
@@ -195,7 +196,6 @@ functions you can list by typing `help` in a real bash shell.
 * `mapfile [-n count] [-O origin] [-s c>`
 * `popd [-n] [+N | -N]`
 * `printf [-v var] format [arguments]`
-* `pushd [-n] [+N | -N | dir]`
 * `read [-ers] [-a array] [-d delim] [->`
 * `readarray [-n count] [-O origin] [-s>`
 * `readonly [-aAf] [name[=value] ...] o>`
