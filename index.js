@@ -277,6 +277,9 @@ Bash.prototype.createStream = function () {
     var closed = false;
     
     var output = resumer();
+    self.on('bgdata', function (buf) {
+        output.queue(buf);
+    });
     output.queue(self.getPrompt());
     
     self.current = null;
@@ -419,6 +422,9 @@ Bash.prototype.eval = function (line) {
                 var index = self._jobIndex();
                 self.jobs[index] = cmd;
                 (function (cmd, index) {
+                    cmd.on('data', function (buf) {
+                        self.emit('bgdata', buf);
+                    });
                     cmd.on('end', function () {
                         delete self.jobs[index];
                         self.emit('done', index, cmd);
