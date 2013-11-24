@@ -317,3 +317,30 @@ test('pushd with the -n argument should only modify the stack, not PWD (reverse 
     }));
     s.end('pushd nope -n; echo $?; pwd;');
 });
+
+test('pushd with the -n argument and no dir should be a noop', function (t) {
+    t.plan(3);
+
+    var sh = bash({
+        spawn: function (cmd) { t.fail('spawn ' + cmd) },
+        env: {
+            PS1: '$ ',
+            PWD: '/beep/boop',
+            HOME: '/home/robot'
+        },
+        exists: function (cmd) { t.fail('exists ' + cmd) }
+    });
+    sh.dirs = [
+        '/home/robot'
+    ];
+
+    var s = sh.createStream();
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ 0\n/beep/boop\n');
+        t.same(sh.dirs, [
+            '/home/robot'
+        ]);
+        t.equal(sh.env.PWD, '/beep/boop');
+    }));
+    s.end('pushd -n; echo $?; pwd;');
+});
