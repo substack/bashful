@@ -197,3 +197,71 @@ test('pushd avoids false positives for stack rotation arguments', function (t) {
     }));
     s.end('pushd /42-things-you-should-try-while-in-oakland; echo $?; pwd;');
 });
+
+test('pushd with positive stack rotation argument', function (t) {
+    t.plan(4);
+
+    var sh = bash({
+        spawn: function (cmd) { t.fail('spawn ' + cmd) },
+        env: {
+            PS1: '$ ',
+            PWD: '/4',
+            HOME: '/home/robot'
+        },
+        exists: function (file, cb) {
+            t.equal(file, '/2');
+            cb(file === '/2');
+        }
+    });
+    sh.dirs = [
+        '/3',
+        '/2',
+        '/1'
+    ];
+
+    var s = sh.createStream();
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ /2 /1 /4 /3\n0\n/2\n');
+        t.same(sh.dirs, [
+            '/1',
+            '/4',
+            '/3'
+        ]);
+        t.equal(sh.env.PWD, '/2');
+    }));
+    s.end('pushd +2; echo $?; pwd;');
+});
+
+test('pushd with negative stack rotation argument', function (t) {
+    t.plan(4);
+
+    var sh = bash({
+        spawn: function (cmd) { t.fail('spawn ' + cmd) },
+        env: {
+            PS1: '$ ',
+            PWD: '/4',
+            HOME: '/home/robot'
+        },
+        exists: function (file, cb) {
+            t.equal(file, '/3');
+            cb(file === '/3');
+        }
+    });
+    sh.dirs = [
+        '/3',
+        '/2',
+        '/1'
+    ];
+
+    var s = sh.createStream();
+    s.pipe(concat(function (src) {
+        t.equal(src + '', '$ /3 /2 /1 /4\n0\n/3\n');
+        t.same(sh.dirs, [
+            '/2',
+            '/1',
+            '/4'
+        ]);
+        t.equal(sh.env.PWD, '/3');
+    }));
+    s.end('pushd -3; echo $?; pwd;');
+});
