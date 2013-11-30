@@ -5,6 +5,8 @@ so you can use your own IO backend.
 
 [![build status](https://secure.travis-ci.org/substack/bashful.png)](http://travis-ci.org/substack/bashful)
 
+[![browser support](https://ci.testling.com/substack/bashful.png)](https://ci.testling.com/substack/bashful)
+
 # example
 
 using the default line-buffering in node:
