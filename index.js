@@ -18,12 +18,7 @@ function Bash (opts) {
     if (!(this instanceof Bash)) return new Bash(opts);
     if (!opts) opts = {};
     this.env = opts.env || {};
-    if (this.env.PS1 === undefined) {
-        this.env.PS1 = opts.isTTY === false
-            ? '\\w \\$ '
-            : '\\w \\$ '
-        ;
-    }
+    if (!this.env.PS1) this.env.PS1 = '\\w \\$ ';
     if (!this.env.PWD) this.env.PWD = '/';
     this.custom = opts.custom || [];
     
